@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2015
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShootGame - 副本", "ShootGame - 副本.csproj", "{30165CD1-BD35-B9FE-743C-1ECD6574A4D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShootGame - 副本.Editor", "ShootGame - 副本.Editor.csproj", "{34C44148-0155-D9D9-6F83-C2ABEE8DA215}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{30165CD1-BD35-B9FE-743C-1ECD6574A4D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30165CD1-BD35-B9FE-743C-1ECD6574A4D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30165CD1-BD35-B9FE-743C-1ECD6574A4D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30165CD1-BD35-B9FE-743C-1ECD6574A4D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34C44148-0155-D9D9-6F83-C2ABEE8DA215}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34C44148-0155-D9D9-6F83-C2ABEE8DA215}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34C44148-0155-D9D9-6F83-C2ABEE8DA215}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34C44148-0155-D9D9-6F83-C2ABEE8DA215}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

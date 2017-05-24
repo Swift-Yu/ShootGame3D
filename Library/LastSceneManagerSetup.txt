@@ -1,0 +1,4 @@
+sceneSetups:
+- path: Assets/yuwanlong_xiaoyabiepao/SGTAssets/CS_Assets/CS_Scenes/CS_Game.unity
+  isLoaded: 1
+  isActive: 1
