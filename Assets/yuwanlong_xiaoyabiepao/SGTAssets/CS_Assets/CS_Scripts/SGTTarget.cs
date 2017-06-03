@@ -11,11 +11,17 @@ namespace ShootingGallery
 	{	
 		internal GameObject GameController;
 
-		// The bonus multiplier that this target gives
+		// 得分累加器，暂时弃用
+        [HideInInspector]
 		public Vector2 bonusMultiplier = new Vector2(1,1);
 
-		// The bonus multiplier that this target gives
+		// 时间奖励累加器，暂时弃用
+        [HideInInspector]
 		public Vector2 timeBonusMultiplier = new Vector2(1,1);
+
+        // 添加：鸭子皮肤自带分数，此参数由Setting进行分配设置
+        [HideInInspector]
+	    public Vector2 ScoreOfTargets;
 
 		// How long to wait before showing the target
 		internal float showTime = 0;
@@ -36,6 +42,10 @@ namespace ShootingGallery
 
 		// The sound that plays when this object is hit
 		public AudioClip soundHit;
+
+        //special effect
+        [HideInInspector]
+	    public GameObject specialEffect;
 
 		// The source from which sound for this object play
 		public string soundSourceTag = "GameController";
@@ -108,17 +118,34 @@ namespace ShootingGallery
 				// Reset the target after waiting to the hit animation duration
 				StartCoroutine(ResetTarget(GetComponent<Animation>().GetClip(hitAnimation).length));
 
-				// Set the bonus multiplier for this target
-				GameController.SendMessage("SetBonusMultiplier", Mathf.RoundToInt(Random.Range(bonusMultiplier.x, bonusMultiplier.y)));
+				//修改得分累加器，弃用，分数固定
+				//GameController.SendMessage("SetBonusMultiplier", Mathf.RoundToInt(Random.Range(bonusMultiplier.x, bonusMultiplier.y)));
 
-				// Set the bonus multiplier for this target
-				GameController.SendMessage("SetTimeBonusMultiplier", Mathf.RoundToInt(Random.Range(timeBonusMultiplier.x, timeBonusMultiplier.y)));
+				//时间累加器，弃用，值始终为0，单个击中目标时不再有时间奖励
+				//GameController.SendMessage("SetTimeBonusMultiplier", Mathf.RoundToInt(Random.Range(timeBonusMultiplier.x, timeBonusMultiplier.y)));
+
+                //获取当前目标的射击得分
+                GameController.SendMessage("SetHitTargetBonus", Mathf.RoundToInt(Random.Range(ScoreOfTargets.x, ScoreOfTargets.y)));
 
 				// Give hit bonus for this target
 				GameController.SendMessage("HitBonus", hitSource);
 
-				// If there is a sound source and a sound assigned, play it
-				if ( soundSourceTag != "" && soundHit )    
+                //If there is a special effect, show it when its lift time
+                //if (specialEffect)
+                //{
+                //    while (specialEffect.gameObject.activeSelf)
+                //    {
+                //        specialEffect.gameObject.SetActive(false);
+                //    }
+                //    specialEffect.gameObject.SetActive(true);
+                //}
+			    if (specialEffect)
+			    {
+                    GameObject newSpecialEffect = Instantiate(specialEffect, hitSource.parent) as GameObject;
+                    newSpecialEffect.GetComponent<RectTransform>().position = new Vector3(hitSource.position.x,hitSource.position.y+4,hitSource.position.z-4);;
+			    }
+                // If there is a sound source and a sound assigned, play it
+                if ( soundSourceTag != "" && soundHit )    
 				{
 					//Reset the pitch back to normal
 					GameObject.FindGameObjectWithTag(soundSourceTag).GetComponent<AudioSource>().pitch = Random.Range( pitchRange.x, pitchRange.y);;

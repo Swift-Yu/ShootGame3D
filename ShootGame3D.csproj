@@ -319,6 +319,9 @@
     <Compile Include="Assets\yuwanlong_xiaoyabiepao\Scripts\GyroController.cs" />
     <Compile Include="Assets\yuwanlong_xiaoyabiepao\Scripts\LostCamera.cs" />
     <Compile Include="Assets\yuwanlong_xiaoyabiepao\Scripts\ReadyEffect.cs" />
+    <Compile Include="Assets\yuwanlong_xiaoyabiepao\Scripts\ResetHighScore.cs" />
+    <Compile Include="Assets\yuwanlong_xiaoyabiepao\Scripts\SetEffect.cs" />
+    <Compile Include="Assets\yuwanlong_xiaoyabiepao\Scripts\SetTheTargetsBonus.cs" />
     <Compile Include="Assets\yuwanlong_xiaoyabiepao\Scripts\ShowFPS.cs" />
     <Compile Include="Assets\yuwanlong_xiaoyabiepao\Scripts\Sight.cs" />
     <Compile Include="Assets\yuwanlong_xiaoyabiepao\Scripts\StartButton.cs" />

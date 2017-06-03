@@ -8,18 +8,21 @@ using UnityEngine.UI;
 using ShootingGallery.Types;
 using HedgehogTeam.CoreShooterKit;
 using HedgehogTeam.EasyPoolManager;
+using UnityEngine.Events;
 using UnityStandardAssets.Characters.FirstPerson;
 
 namespace ShootingGallery
 {
 	/// <summary>
 	/// This script controls the game, starting it, following game progress, and finishing it with game over.
-	/// </summary>
+	/// </summary>r
 	public class SGTGameController:MonoBehaviour
 	{
         public Weapon weapon;
         public StaticFirstPerson firstPerson;
 	    public Camera MCamera;
+	    private int shootCount = 0;
+	    private int hitCount = 0;
 	    //public GyroController gyro;
 		// How long to wait before starting the game. Ready?GO! time
 		public float startDelay = 1;
@@ -29,6 +32,14 @@ namespace ShootingGallery
 
 		// How many seconds are left before game over
 		public float timeLeft = 30;
+
+        //how many time used when you finish your shoot
+        [HideInInspector]
+	    public float shootTime;
+
+        //level left time to bonus;
+        [HideInInspector]
+        public float leftTimeToBonus;
 
 		// The text object that displays the time
 		public Text timeText;
@@ -66,7 +77,7 @@ namespace ShootingGallery
 		// The bullet/shot that appears when you shoot
 		public GameObject shotObject;
 
-	    public Transform effectPoint;
+	    //public Transform effectPoint;
 
 		// The maximum number of bullets you can have
 		public int ammo = 6;
@@ -103,6 +114,8 @@ namespace ShootingGallery
 
 		// How many seconds we earn when we hit a target. This time bonus is multiplied by the number of targets on screen
 		public int hitTargetTimeBonus = 0;
+
+	    public GameObject levelUpEffect;
 		
 		// The time bonus multiplier that is affected by the type of target we hit
 		public float timeBonusMultiplier = 0;
@@ -170,9 +183,28 @@ namespace ShootingGallery
 		// A general use index
 		internal int index = 0;
 	    public GameEntity player;
-		//public Transform slowMotionEffect;
+        //public Transform slowMotionEffect;
+        [SerializeField]
+        private UnityEvent onPerfectShoot;
+        [SerializeField]
+        private UnityEvent onCleanShoot;
+	    [SerializeField]
+        private UnityEvent onFastShoot;
 
-		void Awake()
+	    [SerializeField]
+        private SetEffect setEffect;
+        [SerializeField]
+        private GameObject AllHitEffect;
+	    [SerializeField]
+        private GameObject PerfectHitEffect;
+	    [SerializeField]
+        private GameObject FastHitEffect;
+
+	    //private bool isPerfect = false;
+
+	    //private bool isFast = false;
+
+        void Awake()
 		{
 		    weapon.Init(player.gameObject, player.faction);
 		    // Activate the pause canvas early on, so it can detect info about sound volume state
@@ -235,8 +267,6 @@ namespace ShootingGallery
 			    {
                     movingTarget.SendMessage("HideTarget");
                 }            
-                //SGTTarget Target = movingTarget.GetComponent<SGTTarget>();
-                //         Target.HideTargets();
             }
 
 			// Show the replacement target
@@ -330,7 +360,7 @@ namespace ShootingGallery
 					{
 						// Count down the time
 						timeLeft -= Time.deltaTime;
-
+					    shootTime += Time.deltaTime;
 						// Update the timer
 						UpdateTime();
 					}
@@ -430,57 +460,59 @@ namespace ShootingGallery
 		/// <param name="targetCount">The maximum number of target that will appear</param>
 		void ShowTarget( int targetCount )
 		{
+            Debug.Log("targetCount = "+targetCount);
 			// Limit the number of tries when showing targets, so we don't get stuck in an infinite loop
-			int maximumTries = targetCount * 5;
-
+			int maximumTries = targetCount * 10;
+		    shootCount = 0;
+		    hitCount = 0;
 			// Show several targets that are within the game area
-			while ( targetCount > 0 && maximumTries > 0 )
-			{
-				maximumTries--;
+		    while (targetCount > 0 && maximumTries > 0)
+		    {
+		        maximumTries--;
 
-				// Choose a random target
-				int randomTarget = Mathf.FloorToInt(Random.Range(0, movingTargets.Length));
+		        // Choose a random target
+		        int randomTarget = Mathf.FloorToInt(Random.Range(0, movingTargets.Length));
 
-				// If the chosen target is hidden, and is within the game area, show it!
-			    if (Mathf.Abs(movingTargets[randomTarget].position.x) < targetShowArea)
-			    {
-			        targetCount--;
+		        // If the chosen target is hidden, and is within the game area, show it!
+		        if (Mathf.Abs(movingTargets[randomTarget].position.x) < targetShowArea)
+		        {
+		            targetCount--;
 
-			        // There is a chance to show a special target
-			        //if ( Random.value < specialTargetChance && levels[currentLevel].specialTarget )
-			        //{
-			        //	//Create a new special target
-			        //	currentSpecialTarget = Instantiate( levels[currentLevel].specialTarget) as Transform;
+		            // There is a chance to show a special target
+		            //if (Random.value < specialTargetChance && levels[currentLevel].specialTarget)
+		            //{
+		            //    //Create a new special target
+		            //    currentSpecialTarget = Instantiate(levels[currentLevel].specialTarget) as Transform;
 
-			        //	// Place the new target inside the moving targets row
-			        //	currentSpecialTarget.SetParent(movingTargets[randomTarget].parent);
+		            //    // Place the new target inside the moving targets row
+		            //    currentSpecialTarget.SetParent(movingTargets[randomTarget].parent);
 
-			        //	// Set the position of the special target
-			        //	currentSpecialTarget.position = movingTargets[randomTarget].position;
+		            //    // Set the position of the special target
+		            //    currentSpecialTarget.position = movingTargets[randomTarget].position;
 
-			        //	// Set the scale of the special target
-			        //	currentSpecialTarget.localScale = movingTargets[randomTarget].localScale;
+		            //    // Set the scale of the special target
+		            //    currentSpecialTarget.localScale = movingTargets[randomTarget].localScale;
 
-			        //	// Show a random targets from the list of moving targets
-			        //	currentSpecialTarget.SendMessage("ShowTarget", hideDelay);
+		            //    // Show a random targets from the list of moving targets
+		            //    currentSpecialTarget.SendMessage("ShowTarget", hideDelay);
 
-			        //	// Clear the special target as we don't need it anymore
-			        //	levels[currentLevel].specialTarget = null;
+		            //    // Clear the special target as we don't need it anymore
+		            //    levels[currentLevel].specialTarget = null;
 
-			        //	// Set the replacement target
-			        //	currentReplacement = movingTargets[randomTarget];
+		            //    // Set the replacement target
+		            //    currentReplacement = movingTargets[randomTarget];
 
-			        //	// Hide the replacement target
-			        //	currentReplacement.gameObject.SetActive(false);
-			        //}
-			        //else
-			        //{
-			        // Show a random targets from the list of moving targets
-                        movingTargets[randomTarget].SendMessage("ShowTarget", hideDelay);                   
-			    }
-			}
+		            //    // Hide the replacement target
+		            //    currentReplacement.gameObject.SetActive(false);
+		            //}
+		            //else
+		            //{
+		            // Show a random targets from the list of moving targets
+		            movingTargets[randomTarget].SendMessage("ShowTarget", hideDelay);
+		        }
+		    }
 
-			// Reset the streak when showing a batch of new targets
+		    // Reset the streak when showing a batch of new targets
 			streak = 1;
 		}
 
@@ -488,22 +520,21 @@ namespace ShootingGallery
 		/// Give a bonus when the target is hit. The bonus is multiplied by the number of targets on screen
 		/// </summary>
 		/// <param name="hitSource">The target that was hit</param>
-		void HitBonus( Transform hitSource )
-		{
+		void HitBonus( Transform hitSource)
+        { 
 			// If we have a bonus effect
 			if ( bonusEffect && hitTargetBonus > 0 && bonusMultiplier > 0 )
 			{
                 // Create a new bonus effect at the hitSource position
                 Transform newBonusEffect = Instantiate(bonusEffect, hitSource.position, Quaternion.identity) as Transform;
-
-                //// Display the bonus value multiplied by a streak
-                newBonusEffect.Find("Text").GetComponent<Text>().text = "+" + (hitTargetBonus * streak * bonusMultiplier).ToString();
-
+                newBonusEffect.position = new Vector3(newBonusEffect.position.x,newBonusEffect.position.y,newBonusEffect.position.z-8); 
+                //修改得分方式：
+                //newBonusEffect.Find("Text").GetComponent<Text>().text = "+" + (hitTargetBonus * streak * bonusMultiplier).ToString();
+                newBonusEffect.Find("Text").GetComponent<Text>().text = "+" + (hitTargetBonus).ToString();
                 // Rotate the bonus text slightly
                 newBonusEffect.eulerAngles = Vector3.forward * Random.Range(-10, 10);
-       //         GameObject effect = PoolManager.Spawn(bonusEffect.gameObject, hitSource.position, Quaternion.identity);
 			    //effect.transform.localScale = Vector3.one;
-			    //CombatText text = effect.GetComponent<CombatText>();
+			    //CombatText text = effect.GetComponent<CombatText>();ni z 
 			    //if (text)
 			    //    text.suffixLabel = "+" + (hitTargetBonus*streak*bonusMultiplier).ToString();
 
@@ -524,16 +555,37 @@ namespace ShootingGallery
 
 			// Increase the hit streak
 			streak++;
+		    hitCount++;
+		    if (hitCount == levels[currentLevel].maximumTargets)
+		    {
+		        if (shootCount == hitCount)
+		        {
+                     ChangeScore(levels[currentLevel].PerfectBonus);
+                     StartCoroutine(setEffect.HitEffect(PerfectHitEffect, levels[currentLevel].PerfectBonus.ToString()));
+                     onPerfectShoot.Invoke();
 
-			// Add the bonus to the score
-			ChangeScore(hitTargetBonus * streak * bonusMultiplier);
+		        }
+		        else
+		        {
+                    ChangeScore(levels[currentLevel].CleanBonus);
+                    StartCoroutine(setEffect.HitEffect(AllHitEffect, levels[currentLevel].CleanBonus.ToString()));
+                    onCleanShoot.Invoke();
+                }
+		    }
+            //分数奖励，现在为固定值
+            //ChangeScore(hitTargetBonus * streak * bonusMultiplier);
+            ChangeScore(hitTargetBonus);
+            //时间奖励，现在在击中单个目标是不再有时间奖励，弃用
+            //timeLeft += hitTargetTimeBonus * streak * timeBonusMultiplier;
 
-			// Add the time bonus to the time
-			timeLeft += hitTargetTimeBonus * streak * timeBonusMultiplier;
-			
-			// Update the timer
-			UpdateTime();
+            //Update the timer
+            //UpdateTime();
 		}
+
+	    void SetHitTargetBonus(int targetBonus)
+	    {
+	        hitTargetBonus = targetBonus;
+	    }
 
 		void SetBonusMultiplier( float multiplierValue )
 		{
@@ -549,7 +601,7 @@ namespace ShootingGallery
 		/// Change the score
 		/// </summary>
 		/// <param name="changeValue">Change value</param>
-		void  ChangeScore( float changeValue )
+		public  void  ChangeScore( float changeValue )
 		{
 			score += (int)changeValue;
 
@@ -565,7 +617,7 @@ namespace ShootingGallery
 			//Update the score text
 			if ( scoreText )    scoreText.GetComponent<Text>().text = score.ToString();
 
-			// If we reached the required number of points, level up!
+			// If we reached the required number of points, level up!jiu 
 			if ( score >= levels[currentLevel].scoreToNextLevel )
 			{
 				if ( currentLevel < levels.Length - 1 )    LevelUp();
@@ -594,13 +646,34 @@ namespace ShootingGallery
 		/// </summary>
 		void  LevelUp()
 		{
-			currentLevel++;
+            Debug.Log(shootTime);
+            //if we have a left time bonus
+            if (shootTime < levels[currentLevel].TimeToBonus)
+            {
+                score += (int)levels[currentLevel].extraBonusFromTime;
+                onFastShoot.Invoke();
+                StartCoroutine(setEffect.HitEffect(FastHitEffect, levels[currentLevel].extraBonusFromTime.ToString()));
+            }
+            // Update the level attributes
+            // 此处调用update只是为了更新一下时间
+            UpdateLevel();
 
-			// Update the level attributes
-			UpdateLevel();
+            LevelUpEffect();
 
+            currentLevel++;
+
+            //正确更新鸭子数量和速度
+            // Set the maximum number of targets
+            maximumTargets = levels[currentLevel].maximumTargets;
+
+            // Update the game speed
+            movingSpeed = levels[currentLevel].movingSpeed;
+
+            if (progressCanvas) progressCanvas.Find("Text").GetComponent<Text>().text = (currentLevel + 1).ToString();
+
+            UpdateScore();
 			//Run the level up effect, displaying a sound
-			LevelUpEffect();
+		    shootTime = 0;
 		}
 
 		/// <summary>
@@ -645,15 +718,18 @@ namespace ShootingGallery
 		void  LevelUpEffect ()
 		{
 			// Show the time bonus effect when we level up
-			if ( bonusEffect )
+			if ( levelUpEffect )
 			{
-				// Create a new bonus effect at the hitSource position
-				Transform newBonusEffect = Instantiate(bonusEffect) as Transform;
-
-				newBonusEffect.position = new Vector3( Camera.main.ScreenToWorldPoint(timeText.transform.position).x, Camera.main.ScreenToWorldPoint(timeText.transform.position).y - 2, 0);
-
-				// Display the bonus value multiplied by a streak
-				newBonusEffect.Find("Text").GetComponent<Text>().text = "EXTRA TIME!\n+" + levels[currentLevel].timeBonus.ToString();
+                // Transform newBonusEffect = Instantiate(bonusEffect);
+                //newBonusEffect.position = readyGoEffect.position;
+                //newBonusEffect.position = new Vector3( Camera.main.ScreenToWorldPoint(timeText.transform.position).x, Camera.main.ScreenToWorldPoint(timeText.transform.position).y - 2, 0);
+			    while (levelUpEffect.activeSelf)
+			    {
+			        levelUpEffect.SetActive(false);
+			    }
+                // Display the bonus value multiplied by a streak
+                levelUpEffect.transform.GetChild(0).GetComponent<Text>().text = "EXTRA TIME!\n+" + levels[currentLevel].timeBonus.ToString();
+                levelUpEffect.SetActive(true);
 			}
 
 			//If there is a source and a sound, play it from the source
@@ -855,6 +931,7 @@ namespace ShootingGallery
 		/// </summary>
 		public void Shoot()
 		{
+		    shootCount++;
             //Debug.Log("controller is shooting>>>>>>111111");
             weapon.Shoot();
             //Debug.Log("controller00000000");
@@ -864,8 +941,8 @@ namespace ShootingGallery
                 // GameObject newShot = GameObject.Instantiate(shotObject,effectPoint.position,effectPoint.rotation) as GameObject;               
                 ////newShot.transform.SetParent(Camera.main.transform);
 			    StartCoroutine(ShowEffect());
-                // Reduce from ammo
-                ammoLeft--;
+                // 子弹减少，暂时弃用
+                // ammoLeft--;
                 //Debug.Log("controller555555555");
                 // Update the ammo we have left
                 UpdateAmmo();

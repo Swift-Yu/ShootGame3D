@@ -10,11 +10,14 @@ namespace ShootingGallery.Types
 	[Serializable]
 	public class Level
 	{
-     //   //levelLimited
-	    //public int levelLimited;
+        //   //levelLimited
+        //百发百中
+        public int PerfectBonus = 100;
+        //全部击中
+        public int CleanBonus = 100;
 
-		// The score needed to win this level
-		public int scoreToNextLevel = 200;
+        // The score needed to win this level
+        public int scoreToNextLevel = 200;
 
 		// The time bonus for finishing this level
 		public float timeBonus = 5;
@@ -32,5 +35,10 @@ namespace ShootingGallery.Types
         [HideInInspector]
 		public Transform specialTarget = null;
 
+        //how many time we left will get the bonus when level up
+        public float TimeToBonus;
+
+        //Extra time will get bonus
+	    public float extraBonusFromTime;
 	}
 }
