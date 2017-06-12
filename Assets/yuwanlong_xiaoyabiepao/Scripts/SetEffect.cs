@@ -23,16 +23,17 @@ public class SetEffect : MonoBehaviour
         effect.SetActive(true);
     }
 
-    public IEnumerator HitEffect(GameObject effect, string score)
+    public IEnumerator HitEffect(GameObject effect, string score, string origin)
     {
         //ActiveEffectOnce(effect);
-        //yield return new WaitForSeconds(1.5f);
+        //yield return new WaitForSeconds(1.5f);        
         TextMesh textmesh = effect.GetComponentInChildren<TextMesh>();
-        string originText = textmesh.text;
+        textmesh.text = origin;
+        //string originText = textmesh.text;
         textmesh.text = textmesh.text +"\n"+"+" + score;
         ActiveEffectOnce(effect);
         yield return new WaitForSeconds(1.5f);
-        textmesh.text = originText;
+        //textmesh.text = originText;
     }
 
     public IEnumerator MulitiEffect(GameObject effect1, GameObject effect2)

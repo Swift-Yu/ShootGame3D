@@ -220,6 +220,7 @@ namespace ShootingGallery
 		/// </summary>
 		void Start()
 		{
+            //Debug.LogError("currentlevel is "+currentLevel);
             //gyro.EnableGyro();
             // Check if we are running on a mobile device. If so, remove the crosshair as we don't need it for taps
             if ( Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.WP8Player )    
@@ -257,11 +258,24 @@ namespace ShootingGallery
 			// Reset the spawn delay
 			showDelayCount = 0;
 
-			// Check what level we are on
-			UpdateLevel();
+            // Check what level we are on
+            //UpdateLevel();
+            //在开始的时候重置游戏，关卡数据重置到第一关
+            // Update the timer
+            UpdateTime();
 
-			// Move the targets from one side of the screen to the other, and then reset them
-			foreach ( Transform movingTarget in movingTargets )
+            //正确避免关卡0的出现
+            progressCanvas.Find("Text").GetComponent<Text>().text = (currentLevel + 1).ToString();
+
+            // Set the maximum number of targets
+            maximumTargets = levels[0].maximumTargets;
+
+            // Update the game speed
+            movingSpeed = levels[0].movingSpeed;
+
+
+            // Move the targets from one side of the screen to the other, and then reset them
+            foreach ( Transform movingTarget in movingTargets )
 			{
 			    if (movingTarget.gameObject.activeSelf)
 			    {
@@ -460,7 +474,7 @@ namespace ShootingGallery
 		/// <param name="targetCount">The maximum number of target that will appear</param>
 		void ShowTarget( int targetCount )
 		{
-            Debug.Log("targetCount = "+targetCount);
+            //Debug.Log("targetCount = "+targetCount);
 			// Limit the number of tries when showing targets, so we don't get stuck in an infinite loop
 			int maximumTries = targetCount * 10;
 		    shootCount = 0;
@@ -561,14 +575,14 @@ namespace ShootingGallery
 		        if (shootCount == hitCount)
 		        {
                      ChangeScore(levels[currentLevel].PerfectBonus);
-                     StartCoroutine(setEffect.HitEffect(PerfectHitEffect, levels[currentLevel].PerfectBonus.ToString()));
+                     StartCoroutine(setEffect.HitEffect(PerfectHitEffect, levels[currentLevel].PerfectBonus.ToString(),"百发百中"));
                      onPerfectShoot.Invoke();
 
 		        }
 		        else
 		        {
                     ChangeScore(levels[currentLevel].CleanBonus);
-                    StartCoroutine(setEffect.HitEffect(AllHitEffect, levels[currentLevel].CleanBonus.ToString()));
+                    StartCoroutine(setEffect.HitEffect(AllHitEffect, levels[currentLevel].CleanBonus.ToString(),"全部击中"));
                     onCleanShoot.Invoke();
                 }
 		    }
@@ -646,13 +660,13 @@ namespace ShootingGallery
 		/// </summary>
 		void  LevelUp()
 		{
-            Debug.Log(shootTime);
+            //Debug.Log(shootTime);
             //if we have a left time bonus
             if (shootTime < levels[currentLevel].TimeToBonus)
             {
                 score += (int)levels[currentLevel].extraBonusFromTime;
                 onFastShoot.Invoke();
-                StartCoroutine(setEffect.HitEffect(FastHitEffect, levels[currentLevel].extraBonusFromTime.ToString()));
+                StartCoroutine(setEffect.HitEffect(FastHitEffect, levels[currentLevel].extraBonusFromTime.ToString(),"眼疾手快"));
             }
             // Update the level attributes
             // 此处调用update只是为了更新一下时间

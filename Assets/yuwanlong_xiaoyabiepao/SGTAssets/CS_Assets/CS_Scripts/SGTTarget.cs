@@ -107,6 +107,7 @@ namespace ShootingGallery
 		/// <param name="hitSource">Hit source.</param>
 		void HitTarget( Transform hitSource )
 		{
+		    gameObject.transform.GetComponent<BoxCollider>().enabled = false;
 			if ( isHit == false /*&& isHidden == false*/ )
 			{
 				// The target has been hit. It can't be hit again until it resets
