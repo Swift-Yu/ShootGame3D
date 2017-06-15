@@ -8,7 +8,6 @@ public class BlueToothEvent : MonoBehaviour
 {
 
     [SerializeField] private SGTGameController controller;
-    [SerializeField] private Weapon weapon;
 	// Use this for initialization
 	void Start ()
 	{
@@ -22,7 +21,7 @@ public class BlueToothEvent : MonoBehaviour
 
     void GunShoot()
     {
-        //Debug.Log("Gun is shooting>>>>>>>>>>>>>");
+        Debug.Log("Gun is shooting>>>>>>>>>>>>>");
         //weapon.Shoot();
         controller.Shoot();
     }
@@ -36,7 +35,7 @@ public class BlueToothEvent : MonoBehaviour
 
     void StopShoot()
     {
-        weapon.StopShoot();
+        controller.StopShoot();
     }
 
 }

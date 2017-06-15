@@ -37,7 +37,7 @@ namespace Showbaby.UIComponent
         private Vector2 src;
         #endregion
 
-        void Start()
+        void Awake()
         {
             rtf = GetComponent<RectTransform>();
             src = rtf.anchoredPosition;

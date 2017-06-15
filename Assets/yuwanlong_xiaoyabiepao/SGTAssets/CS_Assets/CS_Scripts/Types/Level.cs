@@ -40,5 +40,13 @@ namespace ShootingGallery.Types
 
         //Extra time will get bonus
 	    public float extraBonusFromTime;
+
+        //Gun rate
+	    public int GunRate = 0;
+        
+        //Boom rate
+	    public int BoomRate = 0;
+
+	    public int MaxPropCountInTargets = 1;
 	}
 }

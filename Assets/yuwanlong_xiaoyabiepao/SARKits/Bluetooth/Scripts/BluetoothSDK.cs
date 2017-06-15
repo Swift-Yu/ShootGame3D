@@ -528,7 +528,7 @@ namespace Showbaby.Bluetooth
         /// <param name="message"></param>
         public void ReceiveBluetoothMessage(string message)
         {
-            Debug.Log("ReceiveBluetoothMessage message " + message);
+//            Debug.Log("ReceiveBluetoothMessage message " + message);
             var jsonData = JsonMapper.ToObject(message);
             if (jsonData.Keys.Contains("status"))
             {

@@ -45,7 +45,7 @@ namespace HedgehogTeam.CoreShooterKit{
 		SerializedProperty fixedAlignment;
 		SerializedProperty alignmentPoint;
 
-		SerializedProperty onStartShooting;
+        SerializedProperty onStartShooting;
 		SerializedProperty onShooting;
 		SerializedProperty onStopShooting;
 		SerializedProperty onReload;
@@ -68,7 +68,7 @@ namespace HedgehogTeam.CoreShooterKit{
 			fixedAlignment = serializedObject.FindProperty("fixedAlignment");
 			alignmentPoint = serializedObject.FindProperty("alignmentPoint");
 
-			isAutonomous = serializedObject.FindProperty("isAutonomous");
+            isAutonomous = serializedObject.FindProperty("isAutonomous");
 			faction = serializedObject.FindProperty("faction");
 			ammunition = serializedObject.FindProperty("ammunition");
 			weaponType = serializedObject.FindProperty("weaponType");

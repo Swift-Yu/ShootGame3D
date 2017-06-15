@@ -6,6 +6,7 @@ using UnityEngine.Events;
 using Showbaby.Command;
 using Showbaby.UI;
 using System;
+using Showbaby.Music;
 
 namespace Showbaby.Bluetooth
 {
@@ -291,7 +292,6 @@ namespace Showbaby.Bluetooth
 #endif
             //向服务器请求枪的名字规则
             CmdManager.Instance.SendGunNameRuleCmd();
-            OnStartOpenBluetooth();
         }
      
         // Update is called once per frame
@@ -352,7 +352,9 @@ namespace Showbaby.Bluetooth
                     BluetoothSDK.BluetoothSdk.StartScan();
                 }
             }
-#endif            
+#elif UNITY_ANDROID
+            reconnectAddress = requestAddress;
+#endif
         }
 
         #endregion Unity引擎方法
@@ -449,6 +451,16 @@ namespace Showbaby.Bluetooth
             if (null != dev)
             {
                 curConnectedName = dev.alias;
+            }else
+            {
+                QRCodeInfo info = GetLocalCodeByAddress(connectedAddress);
+                if (info != null)
+                {
+                    curConnectedName = GetAliasByName(info.name);
+                }else
+                {
+                    curConnectedName = "";
+                }
             }
             if (null != TipWindow.Instance)
             {
@@ -471,16 +483,28 @@ namespace Showbaby.Bluetooth
                 if(!isExit)
                 {
                     curBluetoothList.Add(dev);
-  
+                    WriteBluetoothInfoToLocal(dev);
                 }            
+            }else
+            {
+                QRCodeInfo info = GetLocalCodeByAddress(connectedAddress);
+                if (info != null)
+                {
+                    BluetoothSDKDevInfo devInfo = new BluetoothSDKDevInfo();
+                    devInfo.address = connectedAddress;
+                    devInfo.name = info.name;
+                    devInfo.alias = GetAliasByName(info.name);
+                    curBluetoothList.Add(devInfo);
+                    WriteBluetoothInfoToLocal(devInfo);
+                }                
             }
             RefreshBluetoothListPanel();
             //则将该蓝牙置为已连接状态
             RefreshConnectedState(connectedAddress, true);
             RefreshSelectConnectModePanelTip();
             //如果蓝牙列表可见 将其隐藏
-            OnClickBluetoothListPanelCancelBtn();
-            OnClickSelectConnectPanelCloseBtn();
+            closeBluetoothListPanel();
+            closeSelectConnectPanel();
             if (isQRCodeConnect)
             {
                 OnQRCodeConnectResult(true);//二维码扫描成功
@@ -497,24 +521,21 @@ namespace Showbaby.Bluetooth
                 OnQRCodeConnectResult(false);//二维码扫描失败
             }
             RefreshSelectConnectModePanelTip();
-            var device = GetBluetoothDeviceInfo(requestAddress);
-            var deviceName = "";
-            if (null != device)
-            {
-                deviceName = device.alias;
-            }
+            var device = GetBluetoothDeviceInfo(requestAddress);            
             if (null != TipWindow.Instance)
             {
                 TipWindow.Instance.CloseWaitingWindow();
                 TipWindow.Instance.ShowToastWindow(requestName +" "+ I2.Loc.ScriptLocalization.Bluetooth_Tips.BluetoothConnectedFailed, tipAutoHideDelayTime);
             }
             ////如果蓝牙界面可见 则将该蓝牙置为未连接状态
-            //RefreshConnectedState(connectedAddress, false);
+            changeBluetoothBtnSprite(false);
+            RefreshConnectedState(connectedAddress, false);
             connectedAddress = "";
             //清空当前扫描到的蓝牙列表信息 重新扫描
             DeleteConnectedAddress(requestAddress);
             //在这里刷新蓝牙列表界面
             RefreshBluetoothItems();
+            RefreshBluetoothListPanel();
             BluetoothSDK.BluetoothSdk.RestartScan();
             if (!bluetoothListPanel.activeSelf && !qrCodePanel.activeSelf)
             {
@@ -529,7 +550,11 @@ namespace Showbaby.Bluetooth
         private void OnDisconnected()
         {
             //Debug.Log("OnDisconnected requestAddress " + requestAddress + " connectedAddress " + connectedAddress);
-
+            RefreshSelectConnectModePanelTip();
+            changeBluetoothBtnSprite(false);
+            //如果蓝牙界面可见 则将该蓝牙置为未连接状态
+            RefreshConnectedState(connectedAddress, false);
+           
             //非切换导致的断开 显示断开的提示并刷新列表 切换连接导致的断开 不显示断开的提示且不刷新列表
             if (requestAddress.Equals(connectedAddress))
             {
@@ -537,17 +562,15 @@ namespace Showbaby.Bluetooth
                 {
                     TipWindow.Instance.ShowToastWindow(curConnectedName +" "+ I2.Loc.ScriptLocalization.Bluetooth_Tips.BluetoothDisconnected, tipAutoHideDelayTime);
                 }
+                connectedAddress = "";
                 //清空当前扫描到的蓝牙列表信息 重新扫描
-                DeleteConnectedAddress(connectedAddress);
+                DeleteConnectedAddress(requestAddress);
                 //在这里刷新蓝牙列表界面
-                RefreshBluetoothItems();                           
+                RefreshBluetoothItems();
+                RefreshBluetoothListPanel();
                 Connect(preBluetoothAddress);
                 BluetoothSDK.BluetoothSdk.RestartScan();
             }
-            RefreshSelectConnectModePanelTip();
-            changeBluetoothBtnSprite(false);
-            //如果蓝牙界面可见 则将该蓝牙置为未连接状态
-            RefreshConnectedState(connectedAddress, false);
             connectedAddress = "";
         }
 
@@ -565,10 +588,10 @@ namespace Showbaby.Bluetooth
         }
 
         public void OnReconnecting()
-        {
+        {           
             if (null != TipWindow.Instance)
             {
-                TipWindow.Instance.ShowToastWindow(I2.Loc.ScriptLocalization.Bluetooth_Tips.BluetoothReconnecting, -1);
+                TipWindow.Instance.ShowToastWindow(requestName + " " + I2.Loc.ScriptLocalization.Bluetooth_Tips.BluetoothReconnecting, -1);
             }
         }
 
@@ -588,15 +611,18 @@ namespace Showbaby.Bluetooth
                 TipWindow.Instance.CloseWaitingWindow();
                 TipWindow.Instance.ShowToastWindow(requestName +" "+ I2.Loc.ScriptLocalization.Bluetooth_Tips.BluetoothConnectTimeout, tipAutoHideDelayTime);
             }
-
-            DeleteConnectedAddress(connectedAddress);
+            RefreshConnectedState(connectedAddress, false);
+            DeleteConnectedAddress(requestAddress);
+            connectedAddress = "";
             //在这里刷新蓝牙列表界面
             RefreshBluetoothItems();
+            RefreshBluetoothListPanel();
             BluetoothSDK.BluetoothSdk.RestartScan();
             if (!bluetoothListPanel.activeSelf && !qrCodePanel.activeSelf)
             {
                 ShowSelectConnectModePanel();
-            }          
+            }
+           
         }
 
         /// <summary>
@@ -621,17 +647,27 @@ namespace Showbaby.Bluetooth
 
         #region 网络请求回调
         public void OnNoneNetwork()
-        {
-            if (null != TipWindow.Instance)
+        {            
+            if (isQRCodeConnect)
             {
-                TipWindow.Instance.ShowToastWindow(I2.Loc.ScriptLocalization.Network.NoneNet, tipAutoHideDelayTime);
-            }
-            if(isQRCodeConnect)
-            {
+                if (null != TipWindow.Instance)
+                {
+                    TipWindow.Instance.ShowToastWindow(I2.Loc.ScriptLocalization.Network.NoneNet, tipAutoHideDelayTime);
+                }
                 OnRequestCodeResult(QRCodeConnectState.QRCodeNoneNetwork);
             }
         }
-
+        public void OnErrorNetwork()
+        {          
+            if (isQRCodeConnect)
+            {
+                if (null != TipWindow.Instance)
+                {
+                    TipWindow.Instance.ShowToastWindow(I2.Loc.ScriptLocalization.Network.NetError, tipAutoHideDelayTime);
+                }
+                OnRequestCodeResult(QRCodeConnectState.QRCodeNoneNetwork);
+            }
+        }
         public void GunNameRuleCmd_OnReceiveMessage(string url, string data)
         {
      //       Debug.Log("GunNameRuleCmd_OnReceiveMessage " + " data " + data);
@@ -742,16 +778,7 @@ namespace Showbaby.Bluetooth
                 //Debug.Log("蓝牙已开启 打开选择界面");
                 ShowSelectConnectModePanel();
             }
-        }
-        private void OnStartOpenBluetooth()
-        {
-            var isAvailabled = BluetoothSDK.BluetoothSdk.IsBluetoothReady();//每次都要从底层获取是否已开启（避免用户中途关闭了蓝牙）  
-                   
-            if (isAvailabled)
-            {
-                ShowSelectConnectModePanel();              
-            }
-        }
+        }       
         /// <summary>
         /// 展示蓝牙连接方式选择界面
         /// </summary>
@@ -784,9 +811,15 @@ namespace Showbaby.Bluetooth
         /// </summary>
         public void OnClickSelectConnectPanelCloseBtn()
         {
+            MusciManager.Instance.PlayEffectMusic("CommonButton");
+            closeSelectConnectPanel();
+        }
+
+        private void closeSelectConnectPanel()
+        {
             if (null != selectConnectModePanel)
             {
-                selectConnectModePanel.SetActive(false);             
+                selectConnectModePanel.SetActive(false);
             }
         }
 
@@ -795,7 +828,7 @@ namespace Showbaby.Bluetooth
         /// </summary>
         public void OnClickQRCodeConnectBtn()
         {
-            
+            MusciManager.Instance.PlayEffectMusic("CommonButton");
             //关闭连接方式选择界面
             if (null != selectConnectModePanel)
             {
@@ -825,7 +858,8 @@ namespace Showbaby.Bluetooth
         /// 点击扫描二维码界面的关闭按钮
         /// </summary>
         public void OnClickQRCodePanelCloseBtn()
-        {          
+        {
+            MusciManager.Instance.PlayEffectMusic("CommonButton");
             if (null != qrCodePanel)
             {
                 isQRCodeConnect = false;
@@ -867,6 +901,12 @@ namespace Showbaby.Bluetooth
         /// </summary>
         public void OnClickBluetoothListPanelCancelBtn()
         {
+            MusciManager.Instance.PlayEffectMusic("CommonButton");
+            closeBluetoothListPanel();
+        }
+
+        private void closeBluetoothListPanel()
+        {
             //隐藏蓝牙列表界面
             if (null != bluetoothListPanel)
             {
@@ -886,6 +926,7 @@ namespace Showbaby.Bluetooth
         /// </summary>
         public void OnClickBluetoothListPanelOKBtn()
         {
+            MusciManager.Instance.PlayEffectMusic("CommonButton");
             //如果当前有选择的蓝牙设备且该设备当前未连接就连接该设备 若没有就不处理
             if (!selectedBluetoothAddress.Equals("") && !selectedBluetoothAddress.Equals(connectedAddress))
             {
@@ -914,12 +955,13 @@ namespace Showbaby.Bluetooth
         /// </summary>
         public void OnClickShowListBtn()
         {
+            MusciManager.Instance.PlayEffectMusic("CommonButton");
             //Debug.Log("点击列表选择连接按钮");
             //关闭连接方式选择界面
             if (null != selectConnectModePanel)
             {
                 isQRCodeConnect = false;
-                selectConnectModePanel.SetActive(false);
+                selectConnectModePanel.SetActive(false);                
             }
             //Debug.Log("开始扫描蓝牙设备");
             //开始扫描蓝牙设备
@@ -1457,6 +1499,17 @@ namespace Showbaby.Bluetooth
             if (null != device)
             {
                 requestName = device.alias;
+            }else
+            {
+                QRCodeInfo info = GetLocalCodeByAddress(requestAddress);
+                if (info != null)
+                {
+                    requestName = GetAliasByName(info.name);
+                }
+                else
+                {
+                    requestName = "";
+                }
             }
             if (null != TipWindow.Instance)
             {
@@ -1504,7 +1557,27 @@ namespace Showbaby.Bluetooth
             //在记录中没找到这个二维码信息就说明这是一张新的二维码，返回空 去服务器请求
             return null;
         }
-
+        public QRCodeInfo GetLocalCodeByAddress(string address)
+        {
+            string localQRCodeList = PlayerPrefs.GetString("localQRCodeList");
+            if (localQRCodeList.Equals(""))
+            {
+                //没记录就直接返回空 去服务器请求
+                return null;
+            }
+            var json = JsonMapper.ToObject(localQRCodeList);
+            for (int i = 0; i < json.Count; i++)
+            {
+                var qrcodeinfo = JsonMapper.ToObject<QRCodeInfo>(json[i].ToJson());
+                if (qrcodeinfo.mac.Equals(address))
+                {
+                    //返回记录中的二维码信息
+                    return qrcodeinfo;
+                }
+            }
+            //在记录中没找到这个二维码信息就说明这是一张新的二维码，返回空 去服务器请求
+            return null;
+        }
         /// <summary>
         /// 成功获取二维码对应的mac地址的处理
         /// </summary>

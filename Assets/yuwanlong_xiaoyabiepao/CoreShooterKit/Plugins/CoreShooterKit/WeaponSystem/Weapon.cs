@@ -7,6 +7,7 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using HedgehogTeam.EasyPoolManager;
 using System;
+using ShootingGallery;
 using Showbaby.Bluetooth;
 
 namespace HedgehogTeam.CoreShooterKit{
@@ -36,7 +37,7 @@ namespace HedgehogTeam.CoreShooterKit{
 
 		#region Members
 		public Ammunition ammunition; //The ammunition fired
-
+	    public GameObject Controller;
 		public bool isAutonomous = false; // The weapon is autonomous for shooting and required a Radar component on GameObject
 		public Faction faction; // If the weapon is autonomous, it's requiring a faction
 
@@ -121,8 +122,8 @@ namespace HedgehogTeam.CoreShooterKit{
 
 		#region MonoBehaviour Callback
 		void Awake(){
-			
-			currentGunMode = WeaponMode.None;
+            //Controller = GameObject.FindGameObjectWithTag("GameController");
+            currentGunMode = WeaponMode.None;
 			if (isOneShot) currentGunMode = WeaponMode.OneShot;
 			if (isBurst) currentGunMode = WeaponMode.Burst;
 			if (isAutmotic) currentGunMode = WeaponMode.FullyAutomatic;
@@ -518,10 +519,10 @@ namespace HedgehogTeam.CoreShooterKit{
 			
 		public void Shoot(GameEntity target = null){
 
-            //Debug.Log("WeaponShoot>>>>>>11111111");
+            Debug.Log("WeaponShoot>>>>>>11111111");
             //Debug.Log("bluetoothsdk is null?"+(BluetoothSDK.BluetoothSdk == null));
-			#if UNITY_EDITOR
-			if (barrels.Length == 0){
+#if UNITY_EDITOR
+            if (barrels.Length == 0){
 				//Debug.LogWarning("Barrels not assigned on " + gameObject.name,gameObject);
 				barrels = new Transform[1];
 				barrels[0] = cachedTransform;
@@ -538,7 +539,19 @@ namespace HedgehogTeam.CoreShooterKit{
 					shotTime = 1f/fireRate;
 					isBeamStart = false;
 					shotsCount = 0;
-					onStartShooting.Invoke(this);
+                    onStartShooting.Invoke(this);
+				    if (currentGunMode == WeaponMode.FullyAutomatic)
+				    {
+                        //Debug.LogError("1111 null == Controller " + (null == Controller));
+                        //Debug.LogError("1111 null == Controller.GetComponent<SGTGameController>() " + (null == Controller.GetComponent<SGTGameController>()));
+                       ShootEffect.instance.ShowEffectRepeat();
+                    }
+				    else
+				    {
+                        //Debug.LogError("22222 null == Controller " + (null == Controller));
+                        //Debug.LogError("22222 null == Controller.GetComponent<SGTGameController>() " + (null == Controller.GetComponent<SGTGameController>()));
+                        ShootEffect.instance.ShowShootEffect();
+				    }
                     //Debug.Log("effect is null"+(startShootingEffect == null));
 					//if (startShootingEffect){
 					//	PoolManager.Spawn(startShootingEffect, transform.position,transform.rotation);
@@ -559,6 +572,10 @@ namespace HedgehogTeam.CoreShooterKit{
             //Debug.Log("WeaponStopShoot>>>>>>>>>>>");
             //Debug.Log("cachedAudioSource is "+ cachedAudioSource);
             //Debug.Log("Audio is null"+ (cachedAudioSource == null));
+		    if (currentGunMode == WeaponMode.FullyAutomatic)
+		    {
+		       ShootEffect.instance.StopShowEffectRepeat();
+		    }
 			if (isShooting){
 				//if (cachedAudioSource.loop){
 				//	cachedAudioSource.Stop();

@@ -36,7 +36,8 @@ namespace ShootingGallery
 
 		// Has the target been hit?
 		public bool isHit = false;
-
+	    public bool isGun = false;
+        public bool isBoom = false;
 		// Is the target hidden?
 		public bool isHidden = true;
 
@@ -186,6 +187,9 @@ namespace ShootingGallery
 			// Show the target only if it was hidden before
 			if ( isHidden == true )
 			{
+                // Set how long to wait before hiding the target again
+                hideDelay = showDuration + GetComponent<Animation>().GetClip(showAnimation).length;
+
                 isHidden = false;
                 // Play the show animation
                 GetComponent<Animation>().Play(showAnimation);
@@ -193,11 +197,11 @@ namespace ShootingGallery
 				// Wait for the show animation duration
 				yield return new WaitForSeconds(GetComponent<Animation>().GetClip(showAnimation).length);
 
-				// The target is not hidden anymore
-				//isHidden = false;
+                ////The target is not hidden anymore
+                //isHidden = false;
 
-				// Set how long to wait before hiding the target again
-				hideDelay = showDuration;
+                // Set how long to wait before hiding the target again
+                //hideDelay = showDuration;
 			}	
 		}
 
@@ -218,9 +222,34 @@ namespace ShootingGallery
 			isHit = false;
 		}
 
-	    public void onHit()
+	    public void OnHit()
 	    {
 	        HitTarget(transform);
+	    }
+
+	    public void ChangeSprite(string sprite)
+	    {
+	        transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+	        switch (sprite)
+	        {
+	            case "Gun":
+	                isGun = true;
+                    transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+	                transform.GetChild(0).GetChild(3).gameObject.SetActive(true);
+	                break;
+	            case "Boom":
+	                isBoom = true;
+                    transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                    transform.GetChild(0).GetChild(2).gameObject.SetActive(true);
+	                break;
+	            default:
+	                isBoom = false;
+	                isGun = false;
+	                transform.GetChild(0).GetChild(2).gameObject.SetActive(false);
+	                transform.GetChild(0).GetChild(3).gameObject.SetActive(false);
+	                transform.GetChild(0).GetChild(1).gameObject.SetActive(true);
+	                break;
+	        }
 	    }
 	}
 }
