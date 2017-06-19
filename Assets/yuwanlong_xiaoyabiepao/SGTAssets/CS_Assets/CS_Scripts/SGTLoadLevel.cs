@@ -20,7 +20,7 @@ namespace ShootingGallery
 
 		// The name of the level to be loaded
 		public string levelName = "";
-	    public Transform progeress;
+
 		// load sounds and its source
 		public AudioClip soundLoad;
 		public string soundSourceTag = "GameController";
@@ -72,10 +72,7 @@ namespace ShootingGallery
 
 			// If there is a sound, play it from the source
 			if ( soundSource && soundLoad )    soundSource.GetComponent<AudioSource>().PlayOneShot(soundLoad);
-		    if (progeress)
-		    {
-		        progeress.gameObject.SetActive(true);
-		    }
+
 			// Execute the function after a delay
 			Invoke("ExecuteLoadLevel", loadDelay);
 		}

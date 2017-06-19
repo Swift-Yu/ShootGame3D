@@ -10,11 +10,6 @@ namespace I2.Loc
 		public static string Get( string Term, bool FixForRTL, int maxLineLengthForRTL ) { return LocalizationManager.GetTermTranslation(Term, FixForRTL, maxLineLengthForRTL); }
 
 
-		public static class AudioClip
-		{
-			public static string TestMusic 		{ get{ return Get ("AudioClip/TestMusic"); } }
-		}
-
 		public static class Bluetooth
 		{
 			public static string ConnectDeviceTipText 		{ get{ return Get ("Bluetooth/ConnectDeviceTipText"); } }
@@ -49,23 +44,8 @@ namespace I2.Loc
 			public static string SelectConnectModePanelTipNoneDevice 		{ get{ return Get ("Bluetooth/Tips/SelectConnectModePanelTipNoneDevice"); } }
 		}
 
+		public static string Arial 		{ get{ return Get ("Arial"); } }
 		public static string LanguageChange 		{ get{ return Get ("LanguageChange"); } }
-
-		public static class FeedBack
-		{
-			public static string FeedBackContactHolder 		{ get{ return Get ("FeedBack/FeedBackContactHolder"); } }
-			public static string FeedBackContentHolder 		{ get{ return Get ("FeedBack/FeedBackContentHolder"); } }
-			public static string FeedBackEmpty 		{ get{ return Get ("FeedBack/FeedBackEmpty"); } }
-			public static string FeedBackSubmit 		{ get{ return Get ("FeedBack/FeedBackSubmit"); } }
-			public static string FeedBackSubmitFail 		{ get{ return Get ("FeedBack/FeedBackSubmitFail"); } }
-			public static string FeedBackSubmitSuccess 		{ get{ return Get ("FeedBack/FeedBackSubmitSuccess"); } }
-		}
-
-		public static class MainScene
-		{
-			public static string GameNameLogo 		{ get{ return Get ("MainScene/GameNameLogo"); } }
-			public static string GameStartSprite 		{ get{ return Get ("MainScene/GameStartSprite"); } }
-		}
 
 		public static class Network
 		{
@@ -73,30 +53,10 @@ namespace I2.Loc
 			public static string NoneNet 		{ get{ return Get ("Network/NoneNet"); } }
 		}
 
-		public static class Settings
-		{
-			public static string AudioClose 		{ get{ return Get ("Settings/AudioClose"); } }
-			public static string AudioCloseOff 		{ get{ return Get ("Settings/AudioCloseOff"); } }
-			public static string AudioOpen 		{ get{ return Get ("Settings/AudioOpen"); } }
-			public static string AudioOpenOff 		{ get{ return Get ("Settings/AudioOpenOff"); } }
-			public static string AudioSwitchTitle 		{ get{ return Get ("Settings/AudioSwitchTitle"); } }
-			public static string BluetoothRename 		{ get{ return Get ("Settings/BluetoothRename"); } }
-			public static string ExitGame 		{ get{ return Get ("Settings/ExitGame"); } }
-			public static string FeedBack 		{ get{ return Get ("Settings/FeedBack"); } }
-			public static string LanguageChinese 		{ get{ return Get ("Settings/LanguageChinese"); } }
-			public static string LanguageChineseOff 		{ get{ return Get ("Settings/LanguageChineseOff"); } }
-			public static string LanguageEnglish 		{ get{ return Get ("Settings/LanguageEnglish"); } }
-			public static string LanguageEnglishOff 		{ get{ return Get ("Settings/LanguageEnglishOff"); } }
-			public static string LanguageSwitchTitle 		{ get{ return Get ("Settings/LanguageSwitchTitle"); } }
-			public static string Questions 		{ get{ return Get ("Settings/Questions"); } }
-			public static string SettingTitle 		{ get{ return Get ("Settings/SettingTitle"); } }
-		}
-
 		public static class TipWindow
 		{
 			public static string CancelText 		{ get{ return Get ("TipWindow/CancelText"); } }
 			public static string ConfirmText 		{ get{ return Get ("TipWindow/ConfirmText"); } }
-			public static string ExitGame 		{ get{ return Get ("TipWindow/ExitGame"); } }
 			public static string ExitText 		{ get{ return Get ("TipWindow/ExitText"); } }
 			public static string NoCameraAuthorization 		{ get{ return Get ("TipWindow/NoCameraAuthorization"); } }
 			public static string ProcessText 		{ get{ return Get ("TipWindow/ProcessText"); } }

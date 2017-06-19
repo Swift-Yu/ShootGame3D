@@ -32,10 +32,6 @@ public class QRHelper
     private bool isScanning = false;
 	private bool startCameraFirstFrame = false;
     System.Timers.Timer timer_out;
-
-    private Color32[] buffer = null;
-    private Color32[] tbuffer = null;
-    private object mutex = new object();
     /// <summary>  
     /// 启动摄像头  
     /// </summary>  
@@ -84,13 +80,8 @@ public class QRHelper
         isScanning = true;      
     }
     public void StopScan()
-    {       
+    {
         isScanning = false;
-        lock (mutex)
-        {
-            buffer = null;
-            tbuffer = null;
-        }
     }
     public void ScanCode()
     {
@@ -135,7 +126,9 @@ public class QRHelper
 
     }
 
- 
+    private Color32[] buffer = null;
+    private Color32[] tbuffer = null;
+    private object mutex = new object();
 
     int dw, dh;
     private void WriteDataBuffer()

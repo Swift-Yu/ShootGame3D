@@ -4,7 +4,6 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using System;
 using UnityEngine.SceneManagement;
-using Showbaby.Music;
 
 namespace Showbaby.UI
 {
@@ -70,7 +69,7 @@ namespace Showbaby.UI
         {
             AlertWindow.SetActive(true);
             AlertWindow.transform.Find("Background/Content").GetComponent<Text>().text = content;
-            AlertWindow.transform.Find("Background/ConfirmButton").GetComponent<Button>().onClick.AddListener(() => { MusciManager.Instance.PlayEffectMusic("CommonButton"); callback(); HideAlertWindow(); });
+            AlertWindow.transform.Find("Background/ConfirmButton").GetComponent<Button>().onClick.AddListener(() => { callback(); AlertWindow.SetActive(false); });
             AlertWindow.transform.Find("Background/ConfirmButton").GetComponentInChildren<Text>().text = buttonText;
         }
 
@@ -78,9 +77,9 @@ namespace Showbaby.UI
         {
             ConfirmWindow.SetActive(true);
             ConfirmWindow.transform.Find("Background/Content").GetComponent<Text>().text = content;
-            ConfirmWindow.transform.Find("Background/CancelButton").GetComponent<Button>().onClick.AddListener(() => { MusciManager.Instance.PlayEffectMusic("CommonButton"); HideConfirmWindow(); });
+            ConfirmWindow.transform.Find("Background/CancelButton").GetComponent<Button>().onClick.AddListener(() => {ConfirmWindow.SetActive(false); });
             ConfirmWindow.transform.Find("Background/CancelButton").GetComponentInChildren<Text>().text = cancelText;
-            ConfirmWindow.transform.Find("Background/ConfirmButton").GetComponent<Button>().onClick.AddListener(() => { MusciManager.Instance.PlayEffectMusic("CommonButton"); callback(); HideConfirmWindow(); });
+            ConfirmWindow.transform.Find("Background/ConfirmButton").GetComponent<Button>().onClick.AddListener(() => { callback(); ConfirmWindow.SetActive(false); });
             ConfirmWindow.transform.Find("Background/ConfirmButton").GetComponentInChildren<Text>().text = confirmText;
         }
         public void ShowConfirmWindowInput(string content, string confirmText, string cancelText, Action<string> callback)
@@ -90,13 +89,12 @@ namespace Showbaby.UI
             ConfirmWindow.transform.Find("Background/InputField").gameObject.SetActive(true);
             ConfirmWindow.transform.Find("Background/InputField").GetComponent<InputField>().text = content;
             ConfirmWindow.transform.Find("Background/CancelButton").GetComponent<Button>().onClick.AddListener(() => 
-            { MusciManager.Instance.PlayEffectMusic("CommonButton"); ConfirmWindow.transform.Find("Background/InputField").gameObject.SetActive(false); HideConfirmWindow(); });
+            { ConfirmWindow.transform.Find("Background/InputField").gameObject.SetActive(false); ConfirmWindow.SetActive(false); });
             ConfirmWindow.transform.Find("Background/CancelButton").GetComponentInChildren<Text>().text = cancelText;
-            ConfirmWindow.transform.Find("Background/ConfirmButton").GetComponent<Button>().onClick.AddListener(() =>
-            {
-                MusciManager.Instance.PlayEffectMusic("CommonButton"); callback(ConfirmWindow.transform.Find("Background/InputField").GetComponent<InputField>().text);
+            ConfirmWindow.transform.Find("Background/ConfirmButton").GetComponent<Button>().onClick.AddListener(() => 
+            {   callback(ConfirmWindow.transform.Find("Background/InputField").GetComponent<InputField>().text);
                 ConfirmWindow.transform.Find("Background/InputField").gameObject.SetActive(false);
-                HideConfirmWindow(); });
+                ConfirmWindow.SetActive(false); });
             ConfirmWindow.transform.Find("Background/ConfirmButton").GetComponentInChildren<Text>().text = confirmText;
         }
         public void ShowWaitingWindow(string content, bool canCancel)
@@ -119,19 +117,6 @@ namespace Showbaby.UI
         private void HideToastWindow()
         {
             ToastWindow.SetActive(false);
-        }
-
-        private void HideAlertWindow()
-        {
-            AlertWindow.transform.Find("Background/ConfirmButton").GetComponent<Button>().onClick.RemoveAllListeners();
-            AlertWindow.SetActive(false);
-        }
-
-        private void HideConfirmWindow()
-        {
-            ConfirmWindow.transform.Find("Background/CancelButton").GetComponent<Button>().onClick.RemoveAllListeners();
-            ConfirmWindow.transform.Find("Background/ConfirmButton").GetComponent<Button>().onClick.RemoveAllListeners();
-            ConfirmWindow.SetActive(false);
-        }  
+        }         
     }
 }

@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
+using System.Collections;
 using Showbaby.Bluetooth;
-using Showbaby.Music;
+using UnityEngine.SceneManagement;
+using I2.Loc;
 
 public class Bluetooth : MonoBehaviour
 {
@@ -20,27 +22,39 @@ public class Bluetooth : MonoBehaviour
     public Sprite bluetoothBtnDisabledSprite = null;
     // Use this for initialization
     void Start()
-    {       
+    {
+        BluetoothWindow.OnQRCodeStartCamera += QRCodeStartCamera;
+        BluetoothWindow.OnQRCodeStopCamera += QRCodeStopCamera;
         BluetoothWindow.OnBluetoothConnectSuccess += OnBluetoothConnectSuccess;
         BluetoothWindow.OnBluetoothConnectFail += OnBluetoothConnectFail;
 
-        if (null != BluetoothSDK.BluetoothSdk)
+        if(BluetoothSDK.BluetoothSdk.IsConnected)
         {
-            if (BluetoothSDK.BluetoothSdk.IsConnected)
-            {
-                bluetoothBtnImage.sprite = bluetoothBtnEnabledSprite;
-            }
-            else
-            {
-                bluetoothBtnImage.sprite = bluetoothBtnDisabledSprite;
-            }
-        }        
+            bluetoothBtnImage.sprite = bluetoothBtnEnabledSprite;
+        }else
+        {
+            bluetoothBtnImage.sprite = bluetoothBtnDisabledSprite;
+        }
     }
     void OnDestroy()
-    {     
+    {
+        BluetoothWindow.OnQRCodeStartCamera -= QRCodeStartCamera;
+        BluetoothWindow.OnQRCodeStopCamera -= QRCodeStopCamera;
+
         BluetoothWindow.OnBluetoothConnectSuccess -= OnBluetoothConnectSuccess;
         BluetoothWindow.OnBluetoothConnectFail -= OnBluetoothConnectFail;
-    }  
+    }
+
+    private void QRCodeStartCamera()
+    {
+ //       CameraSettings.OnQRCodeStartCamera();
+    }
+
+    private void QRCodeStopCamera()
+    {
+//        CameraSettings.OnQRCodeStopCamera();
+    }
+
 
     private void OnBluetoothConnectFail()
     {
@@ -49,13 +63,12 @@ public class Bluetooth : MonoBehaviour
 
     private void OnBluetoothConnectSuccess()
     {
-        bluetoothBtnImage.sprite = bluetoothBtnEnabledSprite;
+        bluetoothBtnImage.sprite = bluetoothBtnEnabledSprite; ;
     }
 
     // Update is called once per frame
     public void OpenBluetooth()
     {
-        MusciManager.Instance.PlayEffectMusic("CommonButton");
         if (BluetoothSDK.BluetoothSdk != null)
         {
             BluetoothSDK.BluetoothSdk.OpenBluetoothPanel();
@@ -65,10 +78,43 @@ public class Bluetooth : MonoBehaviour
     // Use this for initialization
     public void RenameBluetooth()
     {
-        MusciManager.Instance.PlayEffectMusic("CommonButton");
         if (BluetoothSDK.BluetoothSdk != null)
         {
             BluetoothSDK.BluetoothSdk.Rename();
+        }
+    }
+
+    public void GotoVuforia()
+    {
+        if (BluetoothSDK.BluetoothSdk != null && BluetoothSDK.BluetoothSdk.IsBluetoothConnect())
+        {
+            SceneManager.LoadScene("Vuforia");
+        }
+
+    }
+
+    // Update is called once per frame
+    public void GotoBack()
+    {
+        SceneManager.LoadScene("Start");
+    }
+
+    public void ChangeLanguage()
+    {
+        if (LocalizationManager.CurrentLanguage == "Chinese")
+        {
+            SetLanguage("English");
+        }
+        else
+        {
+            SetLanguage("Chinese");
+        }
+    }
+    private void SetLanguage(string _Language)
+    {
+        if (LocalizationManager.HasLanguage(_Language))
+        {
+            LocalizationManager.CurrentLanguage = _Language;
         }
     }
 }
